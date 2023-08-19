@@ -42,12 +42,10 @@ Compile for Linux
 <p>&nbsp; &nbsp; （9） 在父进程中，关闭 cgi_input 的读取端 和 cgi_output 的写入端，如果 POST 的话，把 POST 数据写入 cgi_input，已被重定向到 STDIN，读取 cgi_output 的管道输出到客户端，该管道输入是 STDOUT。接着关闭所有管道，等待子进程结束。</p>
 <p>&nbsp; &nbsp; （10） 关闭与浏览器的连接，完成了一次 HTTP 请求与回应，因为 HTTP 是无连接的。</p>
 
-<p><br>
-</p>
-![chart.png](htdocs/chart.png)
-</p>
 
-<p><br></p>
+![image](https://github.com/jiayuancs/Tinyhttpd/assets/114851943/7522b0a0-05c5-4e25-aebf-4a6dd171e491)
+
+
 以下内容来自源作者:
 
   This software is copyright 1999 by J. David Blackstone.  Permission
