@@ -65,6 +65,7 @@ void accept_request(void *arg) {
                 * program */
   char *query_string = NULL;
 
+  // 读取请求行（第一行）
   numchars = get_line(client, buf, sizeof(buf));
   i = 0;
   j = 0;
@@ -75,6 +76,7 @@ void accept_request(void *arg) {
   j = i;
   method[i] = '\0';
 
+  // 如果不是 GET 或 POST 请求，则返回状态码 501，告知浏览器服务端未实现该请求方法
   if (strcasecmp(method, "GET") && strcasecmp(method, "POST")) {
     unimplemented(client);
     return;
@@ -91,6 +93,7 @@ void accept_request(void *arg) {
   }
   url[i] = '\0';
 
+  // query_string 指向 URL 中 `?` 之后的参数
   if (strcasecmp(method, "GET") == 0) {
     query_string = url;
     while ((*query_string != '?') && (*query_string != '\0')) query_string++;
@@ -101,6 +104,7 @@ void accept_request(void *arg) {
     }
   }
 
+  // 拼接文件路径
   sprintf(path, "htdocs%s", url);
   if (path[strlen(path) - 1] == '/') strcat(path, "index.html");
   if (stat(path, &st) == -1) {
@@ -109,6 +113,7 @@ void accept_request(void *arg) {
     not_found(client);
   } else {
     if ((st.st_mode & S_IFMT) == S_IFDIR) strcat(path, "/index.html");
+    // 如果文件具有可执行权限，则 cgi = 1
     if ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH)) cgi = 1;
     if (!cgi)
       serve_file(client, path);
@@ -235,6 +240,7 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
   }
   sprintf(buf, "HTTP/1.0 200 OK\r\n");
   send(client, buf, strlen(buf), 0);
+  // 通过设置环境变量，将请求头中的信息（请求方法、请求参数、请求正文的长度）传给处理程序
   if (pid == 0) /* child: CGI script */
   {
     char meth_env[255];
@@ -254,9 +260,11 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
       sprintf(length_env, "CONTENT_LENGTH=%d", content_length);
       putenv(length_env);
     }
-    execl(path, NULL);
+    execl(path, path, NULL);
     exit(0);
+
   } else { /* parent */
+    // 将请求正文中的数据通过管道传给子进程运行的处理程序
     close(cgi_output[1]);
     close(cgi_input[0]);
     if (strcasecmp(method, "POST") == 0)
