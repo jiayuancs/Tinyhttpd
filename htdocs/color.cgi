@@ -1,15 +1,23 @@
-#!/usr/local/bin/perl -Tw
+#!/bin/bash
+echo "Content-Type: text/html"
+echo 
+echo "<html><body><ul>"
 
-use strict;
-use CGI;
+# 请求方法
+echo "<li>REQUEST_METHOD=${REQUEST_METHOD}</li>"
 
-my($cgi) = new CGI;
+# GET 请求的参数
+if ! [ -z "${QUERY_STRING:+x}" ]; then
+  echo "<li>QUERY_STRING=${QUERY_STRING}</li>"
+fi
 
-print $cgi->header;
-my($color) = "blue";
-$color = $cgi->param('color') if defined $cgi->param('color');
+# POST 请求的数据
+if ! [ -z "${CONTENT_LENGTH:+x}" ]; then
+  echo "<li>CONTENT_LENGTH=${CONTENT_LENGTH}</li>"
+  if [ "${CONTENT_LENGTH}" -gt 0 ]; then
+    read -n $CONTENT_LENGTH POST_DATA <&0
+    echo "<li>POST_DATA=${POST_DATA}</li>"
+  fi
+fi
 
-print $cgi->start_html(-title => uc($color),
-                       -BGCOLOR => $color);
-print $cgi->h1("This is $color");
-print $cgi->end_html;
+echo "</ul></body></html>"
